@@ -11,8 +11,15 @@ class MetaMySQLRepository:
     def __init__(self, session: AsyncSession):
         self.session: AsyncSession = session
 
-    def save_table_info(self, table_infos: list[TableInfo]):
-        self.session.add_all([TableInfoMapper.to_model(table_info) for table_info in table_infos])
+    # def save_table_info(self, table_infos: list[TableInfo]):
+    #     self.session.add_all([TableInfoMapper.to_model(table_info) for table_info in table_infos])
+    #
+    # def save_column_info(self, column_infos: list[ColumnInfo]):
+    #     self.session.add_all([ColumnInfoMapper.to_model(column_info) for column_info in column_infos])
+    async def save_table_info(self, table_infos: list[TableInfo]):
+        for table_info in table_infos:
+            await self.session.merge(TableInfoMapper.to_model(table_info))
 
-    def save_column_info(self, column_infos: list[ColumnInfo]):
-        self.session.add_all([ColumnInfoMapper.to_model(column_info) for column_info in column_infos])
+    async def save_column_info(self, column_infos: list[ColumnInfo]):
+        for column_info in column_infos:
+            await self.session.merge(ColumnInfoMapper.to_model(column_info))

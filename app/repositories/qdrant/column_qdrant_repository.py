@@ -1,0 +1,28 @@
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.http.models import PointStruct
+from qdrant_client.models import VectorParams, Distance
+
+from app.conf.app_config import app_config
+
+
+class ColumnQdrantRepository:
+    column_collection_name = "column_info_collection"
+
+    def __init__(self, client: AsyncQdrantClient):
+        self.client = client
+
+    async def ensure_collection(self):
+        if not await self.client.collection_exists(collection_name=self.column_collection_name):
+            await self.client.create_collection(
+                collection_name=self.column_collection_name,
+                vectors_config=VectorParams(size=app_config.qdrant.embedding_size, distance=Distance.COSINE)
+            )
+
+    async def upsert(self, embeddings: list[list[float]], ids: list[str], payloads: list[dict], batch_size=20):
+        points: list[PointStruct] = [PointStruct(id=id, vector=embedding, payload=payload) for id, embedding, payload in
+                                     zip(ids, embeddings, payloads)]
+        for i in range(0, len(points), batch_size):
+            await self.client.upsert(
+                collection_name=self.column_collection_name,
+                points=points[i:i + batch_size]
+            )
