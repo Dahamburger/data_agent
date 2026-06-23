@@ -46,3 +46,5 @@ dist/
 .cache/
 docker/embedding/bge-large-zh-v1.5/.cache/
 docker
+app_config.yml
+
