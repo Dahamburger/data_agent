@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.entities.column_info import ColumnInfo
 from app.entities.table_info import TableInfo
 from app.repositories.mysql.meta.mappers.column_info_mapper import ColumnInfoMapper
+from app.repositories.mysql.meta.mappers.column_metric_mapper import ColumnMetricMapper
+from app.repositories.mysql.meta.mappers.metric_info_mapper import MetricInfoMapper
 from app.repositories.mysql.meta.mappers.table_info_mapper import TableInfoMapper
 
 
@@ -23,3 +25,11 @@ class MetaMySQLRepository:
     async def save_column_info(self, column_infos: list[ColumnInfo]):
         for column_info in column_infos:
             await self.session.merge(ColumnInfoMapper.to_model(column_info))
+
+    async def save_metric_infos(self, metric_info):
+        for metric in metric_info:
+            await self.session.merge(MetricInfoMapper.to_model(metric))
+
+    async def save_column_metrics(self, column_metrics):
+        for column_metric in column_metrics:
+            await self.session.merge(ColumnMetricMapper.to_model(column_metric))
