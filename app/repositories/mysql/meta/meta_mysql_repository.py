@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.entities.column_info import ColumnInfo
 from app.entities.table_info import TableInfo
+from app.models import ColumnInfoMySQL, TableInfoMySQL
 from app.repositories.mysql.meta.mappers.column_info_mapper import ColumnInfoMapper
 from app.repositories.mysql.meta.mappers.column_metric_mapper import ColumnMetricMapper
 from app.repositories.mysql.meta.mappers.metric_info_mapper import MetricInfoMapper
@@ -33,3 +34,25 @@ class MetaMySQLRepository:
     async def save_column_metrics(self, column_metrics):
         for column_metric in column_metrics:
             await self.session.merge(ColumnMetricMapper.to_model(column_metric))
+
+    async def get_column_info_by_id(self, id: str)->ColumnInfo | None:
+        column_info_mysql: ColumnInfoMySQL | None =  await self.session.get(ColumnInfoMySQL, id)
+        if column_info_mysql:
+            return ColumnInfoMapper.to_entity(column_info_mysql)
+        return None
+
+    async def get_table_info_by_id(self, id: str)->TableInfo | None:
+        table_info_mysql: TableInfoMySQL | None =  await self.session.get(TableInfoMySQL, id)
+        if table_info_mysql:
+            return TableInfoMapper.to_entity(table_info_mysql)
+        return None
+
+    async def get_key_columns_by_table_id(self, table_id):
+        result = await self.session.execute(
+            text(
+                "SELECT * FROM column_info "
+                "WHERE table_id = :table_id AND role IN ('primary_key', 'foreign_key')"
+            ),
+            {"table_id": table_id}
+        )
+        return [ColumnInfoMapper.to_entity(row) for row in result.fetchall()]

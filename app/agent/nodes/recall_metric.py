@@ -20,7 +20,7 @@ async def recall_metric(state: DataAgentState, runtime: Runtime[DataAgentContext
     :return: dict，包含retrieved_metric_infos键，值为检索到的指标信息列表
     """
     writer = runtime.stream_writer
-    writer("召回指标节点")
+    writer("召回指标")
     keywords = state["keywords"]
     metric_qdrant_repository = runtime.context["metric_qdrant_repository"]
     query = state["query"]
@@ -37,15 +37,15 @@ async def recall_metric(state: DataAgentState, runtime: Runtime[DataAgentContext
 
     embedding_client = runtime.context["embedding_client"]
     # 从Qdrant中检索字段信息
-    metric_info_map: dict[str, MetricInfo] = {}
+    metric_infos_map: dict[str, MetricInfo] = {}
     for keyword in keywords:
         # 对keyword进行向量化
         embedding = await embedding_client.aembed_query(keyword)
         current_metric_infos: list[MetricInfo] = await metric_qdrant_repository.search(embedding)
         # 遍历去重
         for metric_info in current_metric_infos:
-            if metric_info.id not in metric_info_map:
-                metric_info_map[metric_info.id] = metric_info
-    retrieved_metric_infos: list[MetricInfo] = list(metric_info_map.values())
-    logger.info(f"检索到的指标信息: {retrieved_metric_infos}")
+            if metric_info.id not in metric_infos_map:
+                metric_infos_map[metric_info.id] = metric_info
+    retrieved_metric_infos: list[MetricInfo] = list(metric_infos_map.values())
+    logger.info(f"检索到的指标信息: {list(metric_infos_map.keys())}")
     return {"retrieved_metric_infos": retrieved_metric_infos}

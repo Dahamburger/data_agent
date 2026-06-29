@@ -11,7 +11,7 @@ class MysqlClientManager:
 
     def __init__(self, config: DBConfig):
         self.engine: AsyncEngine | None = None
-        self.session_factor = None
+        self.session_factory = None
         self.config = config
 
     def _get_url(self):
@@ -26,7 +26,7 @@ class MysqlClientManager:
         # expire_on_commit=False: 提交后不使对象属性过期，避免后续访问时重新查询
         # class_=AsyncSession: 使用异步会话类
         # autoflush=True: 自动刷新会话中的待处理更改到数据库
-        self.session_factor = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession,autoflush=True)
+        self.session_factory = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession,autoflush=True)
     async def close(self):
         await self.engine.dispose()
 

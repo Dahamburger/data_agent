@@ -48,3 +48,27 @@ class ValueESRepository:
                 batch_options.append({"index": {"_index": self.index_name, "_id": batch_value_info.id}})
                 batch_options.append(asdict(batch_value_info))
             await self.es_client.bulk(operations=batch_options)
+
+    async def search(self, keyword, min_score: float = 0.6, limit: int = 10) -> list[ValueInfo]:
+        """
+        在 Elasticsearch 中搜索与给定关键词相关的 ValueInfo 对象
+
+        该方法会在名为 value_index 的索引中执行搜索操作，查找与提供的关键词相关的 ValueInfo 对象。
+        搜索结果会根据相关性得分进行排序，并返回得分高于指定阈值的结果。
+
+        :param keyword: str，要搜索的关键词
+        :param min_score: float，搜索结果的最小得分阈值
+        :param limit: int，返回结果的最大数量，默认为 10
+        :return: list[ValueInfo]，包含搜索到的 ValueInfo 对象列表
+        """
+        query = {
+            "query": {
+                "multi_match": {
+                    "query": keyword,
+                    "fields": ["value"]
+                }
+            }
+        }
+        response = await self.es_client.search(index=self.index_name, body=query, min_score=min_score, size=limit)
+        hits = response['hits']['hits']
+        return [ValueInfo(**hit['_source']) for hit in hits]
