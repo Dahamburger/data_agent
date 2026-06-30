@@ -192,7 +192,7 @@ class MetaKnowledgeService:
         meta_config: MetaConfig = OmegaConf.to_object(OmegaConf.merge(schema, context))
         # 2.根据配置文件同步指定的表信息
         if meta_config.tables:
-            # 2.1 将表信心的字段信息保存到meta数据库中
+            # 2.1 将表信息的字段信息保存到meta数据库中
             column_infos = await self._save_tables_to_meta_db(meta_config)
             logger.info("保存表信息和字段信息到meta数据库完成")
             
