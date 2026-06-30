@@ -3,6 +3,14 @@ from typing import TypedDict
 from app.entities.column_info import ColumnInfo
 from app.entities.metric_info import MetricInfo
 from app.entities.value_info import ValueInfo
+class DBInfoState(TypedDict):
+    dialect: str
+    version: str
+
+class DateInfoState(TypedDict):
+    date: str
+    weekday: str
+    quarter: str
 
 class ColumnInfoState(TypedDict):
     name: str
@@ -32,4 +40,8 @@ class DataAgentState(TypedDict):
     retrieved_value_infos: list[ValueInfo]  # 检索到的字段取值信息
     table_infos: list[TableInfoState] # 表信息
     metric_infos: list[MetricInfoState] # 指标信息
+    date_info: DateInfoState # 日期信息
+    db_info: DBInfoState # 数据库信息
+    sql: str # 生成的SQL
     error: str | None  # 校验sql出现的错误信息
+

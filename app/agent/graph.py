@@ -25,7 +25,7 @@ from app.repositories.es.value_es_repository import ValueESRepository
 from app.repositories.mysql.dw.dw_mysql_repository import DWMySQLRepository
 from app.repositories.mysql.meta.meta_mysql_repository import MetaMySQLRepository
 from app.repositories.qdrant.column_qdrant_repository import ColumnQdrantRepository
-from app.repositories.qdrant.metrics_qdrant_repository import MetricsQdrantRepository
+from app.repositories.qdrant.metric_qdrant_repository import MetricQdrantRepository
 
 graph_builder = StateGraph(state_schema=DataAgentState, context_schema=DataAgentContext)
 
@@ -58,10 +58,11 @@ graph_builder.add_edge("add_extra_context", "generate_sql")
 graph_builder.add_edge("generate_sql", "validate_sql")
 
 graph_builder.add_conditional_edges("validate_sql",
-                                    lambda state: "correct_sql" if state["error"] is None else "run_sql",
+                                    lambda state: "correct_sql" if state["error"] is not None else "run_sql",
                                     {"correct_sql": "correct_sql", "run_sql": "run_sql"})
 graph_builder.add_edge("correct_sql", "run_sql")
 
+graph = graph_builder.compile()
 # mermaid = graph_builder.compile().get_graph().draw_mermaid()
 # print(mermaid)
 
@@ -76,7 +77,7 @@ if __name__ == '__main__':
             dw_mysql_client_manager.init()
             async with meta_mysql_client_manager.session_factory() as meta_session, dw_mysql_client_manager.session_factory() as dw_session:
                 column_qdrant_repository = ColumnQdrantRepository(qdrant_client_manager.client)
-                metric_qdrant_repository = MetricsQdrantRepository(qdrant_client_manager.client)
+                metric_qdrant_repository = MetricQdrantRepository(qdrant_client_manager.client)
                 value_es_repository = ValueESRepository(es_client_manager.client)
                 meta_mysql_repository = MetaMySQLRepository(meta_session)
                 dw_mysql_repository = DWMySQLRepository(dw_session)
@@ -87,7 +88,6 @@ if __name__ == '__main__':
                                            meta_mysql_repository=meta_mysql_repository,
                                            dw_mysql_repository=dw_mysql_repository)
                 state = DataAgentState(query="统计华北地区销售总额", error=None)
-                graph = graph_builder.compile()
                 async for event in graph.astream(input=state, context=context, stream_mode="custom"):
                     print(event)
         finally:

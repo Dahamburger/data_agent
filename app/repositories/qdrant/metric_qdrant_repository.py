@@ -6,7 +6,7 @@ from app.conf.app_config import app_config
 from app.entities.metric_info import MetricInfo
 
 
-class MetricsQdrantRepository:
+class MetricQdrantRepository:
     metrics_collection_name = "metrics_info_collection"
 
     def __init__(self, client: AsyncQdrantClient):

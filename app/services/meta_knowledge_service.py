@@ -15,7 +15,7 @@ from app.repositories.es.value_es_repository import ValueESRepository
 from app.repositories.mysql.dw.dw_mysql_repository import DWMySQLRepository
 from app.repositories.mysql.meta.meta_mysql_repository import MetaMySQLRepository
 from app.repositories.qdrant.column_qdrant_repository import ColumnQdrantRepository
-from app.repositories.qdrant.metrics_qdrant_repository import MetricsQdrantRepository
+from app.repositories.qdrant.metric_qdrant_repository import MetricQdrantRepository
 from app.core.log import logger
 
 
@@ -24,13 +24,13 @@ class MetaKnowledgeService:
                  meta_mysql_repository: MetaMySQLRepository,
                  dw_mysql_repository: DWMySQLRepository,
                  column_qdrant_repository: ColumnQdrantRepository,
-                 metrics_qdrant_repository: MetricsQdrantRepository,
+                 metrics_qdrant_repository: MetricQdrantRepository,
                  embedding_client: HuggingFaceEndpointEmbeddings,
                  value_es_repository: ValueESRepository):
         self.meta_mysql_repository: MetaMySQLRepository = meta_mysql_repository
         self.dw_mysql_repository: DWMySQLRepository = dw_mysql_repository
         self.column_qdrant_repository: ColumnQdrantRepository = column_qdrant_repository
-        self.metrics_qdrant_repository: MetricsQdrantRepository = metrics_qdrant_repository
+        self.metrics_qdrant_repository: MetricQdrantRepository = metrics_qdrant_repository
         self.embedding_client: HuggingFaceEndpointEmbeddings = embedding_client
         self.value_es_repository: ValueESRepository = value_es_repository
 

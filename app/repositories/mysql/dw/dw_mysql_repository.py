@@ -36,3 +36,20 @@ class DWMySQLRepository:
         result = await self.session.execute(text(sql))
         # return [row[0] for row in result.fetchall()]
         return result.scalars().fetchall()
+
+    async def get_db_info(self):
+        result = await self.session.execute(text("select version()"))
+
+        version = result.scalar()
+
+        dialect = self.session.get_bind().dialect.name
+
+        return {'version': version, 'dialect': dialect}
+
+    async def validate_sql(self, sql: str):
+        sql = f"explain {sql}"
+        await self.session.execute(text(sql))
+
+    async def execute_sql(self, sql):
+        result = await self.session.execute(text(sql))
+        return [dict(row) for row in result.mappings().fetchall()]
